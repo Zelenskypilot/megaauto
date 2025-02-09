@@ -41,35 +41,28 @@ bot.on('channel_post', async (ctx) => {
     // Debugging: Log the message
     console.log('New channel post:', message);
 
-    // Check if the message is from the human admin
-    if (message.from && message.from.id.toString() === process.env.HUMAN_ADMIN_ID) {
-        console.log('New message from human admin:', message.text || 'Media message');
+    // Retrieve all user IDs from the database
+    getAllUserIds((userIds) => {
+        if (userIds.length === 0) {
+            console.log('No users found in the database.');
+            return;
+        }
 
-        // Retrieve all user IDs from the database
-        getAllUserIds((userIds) => {
-            if (userIds.length === 0) {
-                console.log('No users found in the database.');
-                return;
+        // Forward the message to each user
+        userIds.forEach((userId) => {
+            try {
+                ctx.telegram.forwardMessage(userId, message.chat.id, message.message_id)
+                    .then(() => {
+                        console.log(`Message forwarded to user ${userId}`);
+                    })
+                    .catch((err) => {
+                        console.error(`Failed to forward message to user ${userId}:`, err);
+                    });
+            } catch (err) {
+                console.error(`Error forwarding message to user ${userId}:`, err);
             }
-
-            // Forward the message to each user
-            userIds.forEach((userId) => {
-                try {
-                    ctx.telegram.forwardMessage(userId, message.chat.id, message.message_id)
-                        .then(() => {
-                            console.log(`Message forwarded to user ${userId}`);
-                        })
-                        .catch((err) => {
-                            console.error(`Failed to forward message to user ${userId}:`, err);
-                        });
-                } catch (err) {
-                    console.error(`Error forwarding message to user ${userId}:`, err);
-                }
-            });
         });
-    } else {
-        console.log('Message is not from the human admin.'); // Debugging
-    }
+    });
 });
 
 // Error handling
