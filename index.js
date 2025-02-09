@@ -29,6 +29,7 @@ function getAllUserIds(callback) {
             return callback([]);
         }
         const userIds = results.map(row => row.user_id);
+        console.log('Retrieved user IDs:', userIds); // Debugging
         callback(userIds);
     });
 }
@@ -36,6 +37,9 @@ function getAllUserIds(callback) {
 // Listen for new messages in the channel
 bot.on('channel_post', async (ctx) => {
     const message = ctx.update.channel_post;
+
+    // Debugging: Log the message
+    console.log('New channel post:', message);
 
     // Check if the message is from the human admin
     if (message.from && message.from.id.toString() === process.env.HUMAN_ADMIN_ID) {
@@ -63,6 +67,8 @@ bot.on('channel_post', async (ctx) => {
                 }
             });
         });
+    } else {
+        console.log('Message is not from the human admin.'); // Debugging
     }
 });
 
@@ -75,4 +81,3 @@ bot.catch((err, ctx) => {
 // Launch the bot
 bot.launch();
 console.log('Forwarding bot is running!');
-
