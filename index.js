@@ -48,8 +48,17 @@ bot.on('channel_post', async (ctx) => {
             return;
         }
 
+        // Exclude the bot's own user ID from the list
+        const botUserId = ctx.botInfo.id; // Get the bot's user ID
+        const filteredUserIds = userIds.filter(userId => userId !== botUserId);
+
+        if (filteredUserIds.length === 0) {
+            console.log('No valid users found after filtering.');
+            return;
+        }
+
         // Forward the message to each user
-        userIds.forEach((userId) => {
+        filteredUserIds.forEach((userId) => {
             try {
                 ctx.telegram.forwardMessage(userId, message.chat.id, message.message_id)
                     .then(() => {
